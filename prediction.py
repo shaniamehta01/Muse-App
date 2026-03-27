@@ -10,7 +10,7 @@ st.title("Prediction Models")
 st.caption("Predicting user adoption using machine learning to guide growth strategy")
 
 # --------------------------
-# 🔥 USE DEFAULT DATASET FIRST
+# 🔥 LOAD DEFAULT DATASET
 # --------------------------
 try:
     df = pd.read_csv("muse_dataset.csv")
@@ -18,7 +18,7 @@ try:
 except:
     df = None
 
-# Optional upload (override)
+# Optional upload
 file = st.file_uploader("Upload your dataset (optional)")
 
 if file:
@@ -31,10 +31,11 @@ if file:
 if df is None:
     st.error("No dataset found. Please upload one.")
 else:
-
     df = df.copy()
 
-    # Encode categorical
+    # --------------------------
+    # ENCODE CATEGORICAL DATA
+    # --------------------------
     le = LabelEncoder()
     for col in df.select_dtypes(include='object').columns:
         df[col] = le.fit_transform(df[col].astype(str))
@@ -46,25 +47,35 @@ else:
         X = df.drop("Adoption", axis=1)
         y = df["Adoption"]
 
+        # --------------------------
+        # TRAIN TEST SPLIT
+        # --------------------------
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
-        model = RandomForestClassifier()
+        # --------------------------
+        # MODEL (FIXED)
+        # --------------------------
+        model = RandomForestClassifier(class_weight="balanced")
         model.fit(X_train, y_train)
 
         y_pred = model.predict(X_test)
         y_prob = model.predict_proba(X_test)[:, 1]
 
         # --------------------------
-        # 🔥 METRICS
+        # 🔥 METRICS (FIXED)
         # --------------------------
+        acc = accuracy_score(y_test, y_pred)
+        prec = precision_score(y_test, y_pred, zero_division=0)
+        rec = recall_score(y_test, y_pred, zero_division=0)
+        f1 = f1_score(y_test, y_pred, zero_division=0)
+
         st.subheader("Model Performance")
 
         col1, col2, col3, col4 = st.columns(4)
-
-        col1.metric("Accuracy", f"{accuracy_score(y_test, y_pred)*100:.1f}%")
-        col2.metric("Precision", f"{precision_score(y_test, y_pred)*100:.1f}%")
-        col3.metric("Recall", f"{recall_score(y_test, y_pred)*100:.1f}%")
-        col4.metric("F1 Score", f"{f1_score(y_test, y_pred)*100:.1f}%")
+        col1.metric("Accuracy", f"{acc*100:.1f}%")
+        col2.metric("Precision", f"{prec*100:.1f}%")
+        col3.metric("Recall", f"{rec*100:.1f}%")
+        col4.metric("F1 Score", f"{f1*100:.1f}%")
 
         # --------------------------
         # 🔥 ROC CURVE
@@ -102,21 +113,22 @@ else:
             feat_df,
             x="Importance",
             y="Feature",
-            orientation='h'
+            orientation='h',
+            title="Top Drivers of User Adoption"
         )
 
         st.plotly_chart(fig2, use_container_width=True)
 
         # --------------------------
-        # 🔥 INSIGHT
+        # 🔥 BUSINESS INSIGHT
         # --------------------------
-        st.subheader("Key Insight")
+        st.subheader("Key Business Insight")
 
         top_feature = feat_df.iloc[-1]["Feature"]
 
         st.success(f"""
 Top driver of adoption: **{top_feature}**
 
-👉 Users influenced by this factor are most likely to adopt  
-👉 Focus product and marketing around this behavior
+👉 Users influenced by this factor are significantly more likely to adopt the platform  
+👉 Focus product improvements and marketing campaigns around this behavior
 """)
