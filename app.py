@@ -4,7 +4,7 @@ st.set_page_config(page_title="Muse AI App", layout="wide")
 
 st.title("Muse AI Fashion Analytics App")
 
-# Sidebar navigation
+# Sidebar Navigation
 page = st.sidebar.radio("Go to", [
     "Executive Summary",
     "Descriptive Analysis",
@@ -15,17 +15,24 @@ page = st.sidebar.radio("Go to", [
     "New Customer Scorer"
 ])
 
+# Routing using exec (IMPORTANT FIX)
 if page == "Executive Summary":
-    import descriptive
+    exec(open("descriptive.py").read())
+
 elif page == "Descriptive Analysis":
-    import descriptive
+    exec(open("descriptive.py").read())
+
 elif page == "Clustering":
-    import clustering
+    exec(open("clustering.py").read())
+
 elif page == "Association Rules":
-    import association
+    exec(open("association.py").read())
+
 elif page == "Prediction Models":
-    import prediction
+    exec(open("prediction.py").read())
+
 elif page == "Prescriptive Actions":
-    import prescriptive
+    exec(open("prescriptive.py").read())
+
 elif page == "New Customer Scorer":
-    import new_user
+    exec(open("new_user.py").read())
