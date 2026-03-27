@@ -5,50 +5,83 @@ from sklearn.ensemble import RandomForestClassifier
 
 st.title("New Customer Scorer")
 
-# Load data
+# -------------------------------
+# LOAD DATA
+# -------------------------------
 df = pd.read_csv("muse_dataset.csv")
 
-# Encode
-le = LabelEncoder()
+# -------------------------------
+# ENCODE DATA
+# -------------------------------
 df_encoded = df.copy()
+le_dict = {}
 
 for col in df_encoded.select_dtypes(include='object').columns:
+    le = LabelEncoder()
     df_encoded[col] = le.fit_transform(df_encoded[col].astype(str))
+    le_dict[col] = le
 
-# Train model
+# -------------------------------
+# TRAIN MODEL
+# -------------------------------
 X = df_encoded.drop("Adoption", axis=1)
 y = df_encoded["Adoption"]
 
 model = RandomForestClassifier()
 model.fit(X, y)
 
-st.subheader("Enter New Customer Details")
+# Save column structure
+model_columns = X.columns
 
-# Simple input fields (keep it basic)
-monthly_spend = st.number_input("Monthly Spend", 0, 5000, 1000)
-outfit_budget = st.number_input("Outfit Budget", 0, 5000, 1000)
+# -------------------------------
+# USER INPUT
+# -------------------------------
+st.subheader("Enter New User Details")
 
-struggle = st.selectbox("Struggles with outfits?", ["Yes", "No"])
-inspiration = st.selectbox("Needs inspiration?", ["Yes", "No"])
+user_data = {}
 
-# Convert input into dataframe
-input_data = pd.DataFrame({
-    "Monthly_Spend": [monthly_spend],
-    "Outfit_Budget": [outfit_budget],
-    "Struggle_Outfits": [1 if struggle=="Yes" else 0],
-    "Lack_Inspiration": [1 if inspiration=="Yes" else 0]
-})
-
-# Fill missing columns
 for col in X.columns:
-    if col not in input_data.columns:
-        input_data[col] = 0
+    if col in df.columns:
+        unique_vals = df[col].unique()
+        
+        if df[col].dtype == 'object':
+            user_data[col] = st.selectbox(col, unique_vals)
+        else:
+            user_data[col] = st.number_input(col, value=int(df[col].mean()))
 
-# Prediction
+# Convert to DataFrame
+input_df = pd.DataFrame([user_data])
+
+# -------------------------------
+# ENCODE INPUT
+# -------------------------------
+for col in input_df.columns:
+    if col in le_dict:
+        le = le_dict[col]
+        input_df[col] = input_df[col].astype(str)
+        input_df[col] = input_df[col].map(
+            lambda x: le.transform([x])[0] if x in le.classes_ else 0
+        )
+
+# -------------------------------
+# ALIGN COLUMNS (IMPORTANT FIX)
+# -------------------------------
+input_df = input_df.reindex(columns=model_columns, fill_value=0)
+
+# -------------------------------
+# PREDICT
+# -------------------------------
 if st.button("Predict"):
-    prediction = model.predict(input_data)[0]
+    prediction = model.predict(input_df)[0]
 
-    if prediction == 1:
-        st.success("High chance of adoption ✅")
+    # Decode output
+    adoption_label = le_dict['Adoption'].inverse_transform([prediction])[0]
+
+    st.success(f"Prediction: {adoption_label}")
+
+    if adoption_label == "Yes":
+        st.info("👉 High probability of app adoption")
+    elif adoption_label == "Maybe":
+        st.warning("👉 Moderate interest — needs targeting")
     else:
-        st.error("Low chance of adoption ❌")
+        st.error("👉 Low interest — requires strong incentives")
