@@ -43,6 +43,7 @@ h1, h2, h3 {
 # TITLE + TAGLINE
 # ---------------------------
 st.title("Muse AI Fashion Analytics App")
+st.sidebar.image("Muse.png", width=120)
 st.markdown("### Turning fashion confusion into confident decisions")
 
 # ---------------------------
