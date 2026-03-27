@@ -1,35 +1,34 @@
 import streamlit as st
 import pandas as pd
+import plotly.express as px
 
-st.title("Executive Summary")
+st.title("Descriptive Analysis")
 
-# AUTO LOAD DATA (NO UPLOAD NEEDED)
+# Load data
 df = pd.read_csv("muse_dataset.csv")
 
-# Metrics
-total_users = df.shape[0]
-interested = df[df['Adoption'] == 'Yes'].shape[0]
-avg_spend = int(df['Monthly_Spend'].mean())
+st.subheader("User Demographics & Behavior")
 
-# Revenue estimate (like sir)
-revenue = int(avg_spend * interested)
+# Spending distribution
+st.subheader("Monthly Spend Distribution")
+fig1 = px.histogram(df, x="Monthly_Spend", nbins=30)
+st.plotly_chart(fig1)
 
-# Top issue
-top_issue = df[['Struggle_Outfits','Body_Fit_Issue','Lack_Inspiration','Budget_Issue']].sum().idxmax()
+# Outfit budget
+st.subheader("Outfit Budget Distribution")
+fig2 = px.histogram(df, x="Outfit_Budget", nbins=30)
+st.plotly_chart(fig2)
 
-# Layout
-col1, col2, col3, col4 = st.columns(4)
+# Problems faced
+st.subheader("Customer Problems")
 
-col1.metric("Interested Customers", f"{interested} / {total_users}")
-col2.metric("Avg Spend", f"₹{avg_spend}")
-col3.metric("Total Revenue", f"₹{revenue}")
-col4.metric("Top Issue", top_issue)
+problems = ['Struggle_Outfits','Body_Fit_Issue','Lack_Inspiration','Budget_Issue']
+problem_counts = df[problems].sum()
 
-st.markdown("---")
+fig3 = px.bar(problem_counts, title="Top Problems Faced")
+st.plotly_chart(fig3)
 
-# Charts
-st.subheader("Purchase Likelihood Distribution")
-st.bar_chart(df['Adoption'].value_counts())
-
-st.subheader("Spending Distribution")
-st.bar_chart(df['Monthly_Spend'])
+# Adoption breakdown
+st.subheader("Adoption Breakdown")
+fig4 = px.pie(df, names="Adoption")
+st.plotly_chart(fig4)
