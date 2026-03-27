@@ -6,22 +6,18 @@ st.set_page_config(page_title="Muse AI", layout="wide")
 # ---------------- PURPLE THEME ----------------
 st.markdown("""
 <style>
-    /* Main background */
     .stApp {
         background: linear-gradient(135deg, #f5f0ff, #ffffff);
     }
 
-    /* Sidebar */
     section[data-testid="stSidebar"] {
         background-color: #ede7ff;
     }
 
-    /* Titles */
     h1, h2, h3 {
         color: #4b2e83;
     }
 
-    /* Buttons */
     .stButton>button {
         background-color: #7b5cff;
         color: white;
@@ -29,14 +25,13 @@ st.markdown("""
         border: none;
     }
 
-    /* Highlight box */
     .block-container {
         padding-top: 2rem;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------- TOP RIGHT LOGO ----------------
+# ---------------- HEADER WITH LOGO ----------------
 col1, col2 = st.columns([8,1])
 
 with col1:
@@ -65,20 +60,23 @@ if page == "Home":
     st.markdown("## Welcome to Muse AI")
 
     st.write("""
-Choosing outfits is not as simple as it seems. Even with endless options, users still struggle with decisions. 
-Lack of inspiration, fit concerns, and multiple overlapping issues often make the experience frustrating.
+Finding the perfect outfit shouldn’t feel confusing. But in reality, most users struggle with multiple challenges — 
+what to wear, how it fits, and whether it suits the occasion.
 
-Muse AI uses data-driven insights to understand these behaviors and help improve fashion decision-making.
+Muse AI is designed as a smart fashion assistant that understands these problems and helps users make better styling decisions.
     """)
 
-    st.markdown("### What this app does:")
+    st.markdown("### What Muse AI helps you do:")
 
-    st.markdown("""
-- 📊 Analyzes customer behavior  
-- 🧠 Identifies key fashion pain points  
-- 🔮 Predicts purchase likelihood  
-- 🚀 Suggests business strategies  
-    """)
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.write("👗 Discover outfit ideas based on your style")
+        st.write("✨ Get recommendations when you're unsure what to wear")
+
+    with col2:
+        st.write("🧠 Solve fit, budget & styling confusion together")
+        st.write("📈 Improve decision-making with AI-driven insights")
 
 # ---------------- ROUTING ----------------
 elif page == "Executive Summary":
