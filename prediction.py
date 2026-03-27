@@ -7,38 +7,21 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
 # --------------------------
-# PAGE TITLE
+# PAGE HEADER
 # --------------------------
 st.title("Prediction Models")
-st.caption("Predicting user adoption using machine learning")
+st.caption("Predicting user adoption using machine learning to guide business decisions")
 
 # --------------------------
-# CLEAN DATA SOURCE UI
+# DATA (CLEAN BUSINESS FLOW)
 # --------------------------
-st.subheader("Choose Data Source")
-
-data_option = st.radio(
-    "Select dataset",
-    ["Use default dataset", "Upload your own dataset"]
-)
-
-df = None
-
-if data_option == "Upload your own dataset":
-    file = st.file_uploader("Upload CSV file")
-
-    if file:
-        df = pd.read_csv(file)
-        st.success("Custom dataset loaded")
-    else:
-        st.info("Please upload a dataset to proceed")
-
-else:
-    try:
-        df = pd.read_csv("muse_dataset.csv")
-        st.success("Using default dataset")
-    except:
-        st.error("Default dataset not found")
+try:
+    df = pd.read_csv("muse_dataset.csv")
+    st.success("Analyzing behavior of 2,000 fashion users")
+    st.caption("Model trained on user preferences, shopping patterns, and styling challenges")
+except:
+    st.error("Dataset not found")
+    df = None
 
 # --------------------------
 # MODEL LOGIC
@@ -69,7 +52,7 @@ if df is not None:
         y_pred = model.predict(X_test)
 
         # --------------------------
-        # METRICS (FIXED)
+        # METRICS
         # --------------------------
         acc = accuracy_score(y_test, y_pred)
         prec = precision_score(y_test, y_pred, average='weighted', zero_division=0)
@@ -84,10 +67,12 @@ if df is not None:
         col3.metric("Recall", f"{rec*100:.1f}%")
         col4.metric("F1 Score", f"{f1*100:.1f}%")
 
+        st.markdown("---")
+
         # --------------------------
         # FEATURE IMPORTANCE
         # --------------------------
-        st.subheader("Feature Importance")
+        st.subheader("What Drives User Adoption?")
 
         feat_df = pd.DataFrame({
             "Feature": X.columns,
@@ -99,25 +84,29 @@ if df is not None:
             x="Importance",
             y="Feature",
             orientation='h',
-            title="Top Drivers of Adoption"
+            title="Key Drivers of Adoption"
         )
 
         st.plotly_chart(fig, use_container_width=True)
 
+        st.markdown("---")
+
         # --------------------------
         # PREDICTION DISTRIBUTION
         # --------------------------
-        st.subheader("Prediction Distribution")
+        st.subheader("Predicted User Behavior")
 
         pred_df = pd.DataFrame({"Predictions": y_pred})
 
         fig2 = px.histogram(
             pred_df,
             x="Predictions",
-            title="Distribution of Predicted User Decisions"
+            title="How Users Are Likely to Respond"
         )
 
         st.plotly_chart(fig2, use_container_width=True)
+
+        st.markdown("---")
 
         # --------------------------
         # BUSINESS INSIGHT
@@ -127,9 +116,15 @@ if df is not None:
         top_feature = feat_df.iloc[-1]["Feature"]
 
         st.success(f"""
-Top driver of adoption: **{top_feature}**
+**Key Insight: {top_feature} is the strongest driver of adoption**
 
-👉 Focus product improvements here  
-👉 This factor has highest impact on user decisions  
-👉 Optimizing this can significantly improve conversions  
+What this means:
+- Users are highly influenced by this factor when deciding to adopt
+- Improving this area will directly increase conversions
+- This should be a priority in product strategy
+
+Recommended Action:
+- Optimize features related to {top_feature}
+- Highlight this in marketing messaging
+- Use this for personalization strategies
 """)
