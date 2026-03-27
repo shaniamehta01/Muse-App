@@ -3,13 +3,51 @@ import streamlit as st
 # ---------------- PAGE CONFIG ----------------
 st.set_page_config(page_title="Muse AI", layout="wide")
 
-# ---------------- TITLE ----------------
-st.title("Muse AI Fashion Analytics App")
+# ---------------- PURPLE THEME ----------------
+st.markdown("""
+<style>
+    /* Main background */
+    .stApp {
+        background: linear-gradient(135deg, #f5f0ff, #ffffff);
+    }
 
-# ---------------- SIDEBAR LOGO ----------------
+    /* Sidebar */
+    section[data-testid="stSidebar"] {
+        background-color: #ede7ff;
+    }
+
+    /* Titles */
+    h1, h2, h3 {
+        color: #4b2e83;
+    }
+
+    /* Buttons */
+    .stButton>button {
+        background-color: #7b5cff;
+        color: white;
+        border-radius: 8px;
+        border: none;
+    }
+
+    /* Highlight box */
+    .block-container {
+        padding-top: 2rem;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# ---------------- TOP RIGHT LOGO ----------------
+col1, col2 = st.columns([8,1])
+
+with col1:
+    st.title("Muse AI Fashion Analytics App")
+
+with col2:
+    st.image("Muse.png", width=80)
+
+# ---------------- SIDEBAR ----------------
 st.sidebar.image("Muse.png", width=120)
 
-# ---------------- SIDEBAR NAVIGATION ----------------
 page = st.sidebar.radio("Go to", [
     "Home",
     "Executive Summary",
@@ -21,18 +59,10 @@ page = st.sidebar.radio("Go to", [
     "New Customer Scorer"
 ])
 
-# ---------------- ROUTING ----------------
-
-# -------- HOME PAGE --------
+# ---------------- HOME ----------------
 if page == "Home":
 
-    col1, col2 = st.columns([1, 4])
-
-    with col1:
-        st.image("Muse.png", width=120)
-
-    with col2:
-        st.markdown("## Welcome to Muse AI")
+    st.markdown("## Welcome to Muse AI")
 
     st.write("""
 Choosing outfits is not as simple as it seems. Even with endless options, users still struggle with decisions. 
@@ -50,30 +80,24 @@ Muse AI uses data-driven insights to understand these behaviors and help improve
 - 🚀 Suggests business strategies  
     """)
 
-# -------- EXECUTIVE SUMMARY --------
+# ---------------- ROUTING ----------------
 elif page == "Executive Summary":
     exec(open("executive.py").read())
 
-# -------- DESCRIPTIVE --------
 elif page == "Descriptive Analysis":
     exec(open("descriptive.py").read())
 
-# -------- CLUSTERING --------
 elif page == "Clustering":
     exec(open("clustering.py").read())
 
-# -------- ASSOCIATION --------
 elif page == "Association Rules":
     exec(open("association.py").read())
 
-# -------- PREDICTION --------
 elif page == "Prediction Models":
     exec(open("prediction.py").read())
 
-# -------- PRESCRIPTIVE --------
 elif page == "Prescriptive Actions":
     exec(open("prescriptive.py").read())
 
-# -------- NEW USER --------
 elif page == "New Customer Scorer":
     exec(open("new_user.py").read())
