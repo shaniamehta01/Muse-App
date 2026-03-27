@@ -4,13 +4,13 @@ import plotly.express as px
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_curve, auc
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
 st.title("Prediction Models")
-st.caption("Predicting user adoption using machine learning to guide growth strategy")
+st.caption("Predicting user adoption using machine learning")
 
 # --------------------------
-# 🔥 LOAD DEFAULT DATASET
+# LOAD DATA
 # --------------------------
 try:
     df = pd.read_csv("muse_dataset.csv")
@@ -18,56 +18,47 @@ try:
 except:
     df = None
 
-# Optional upload
 file = st.file_uploader("Upload your dataset (optional)")
 
 if file:
     df = pd.read_csv(file)
     st.success("Custom dataset loaded")
 
-# --------------------------
-# IF NO DATA
-# --------------------------
 if df is None:
-    st.error("No dataset found. Please upload one.")
+    st.error("No dataset found")
 else:
     df = df.copy()
 
     # --------------------------
-    # ENCODE CATEGORICAL DATA
+    # ENCODE DATA
     # --------------------------
     le = LabelEncoder()
     for col in df.select_dtypes(include='object').columns:
         df[col] = le.fit_transform(df[col].astype(str))
 
     if "Adoption" not in df.columns:
-        st.error("Dataset must contain 'Adoption' column")
-
+        st.error("Dataset must contain 'Adoption'")
     else:
         X = df.drop("Adoption", axis=1)
         y = df["Adoption"]
 
         # --------------------------
-        # TRAIN TEST SPLIT
+        # TRAIN MODEL
         # --------------------------
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
-        # --------------------------
-        # MODEL (FIXED)
-        # --------------------------
         model = RandomForestClassifier(class_weight="balanced")
         model.fit(X_train, y_train)
 
         y_pred = model.predict(X_test)
-        y_prob = model.predict_proba(X_test)[:, 1]
 
         # --------------------------
-        # 🔥 METRICS (FIXED)
+        # FIXED METRICS (MULTI-CLASS SAFE)
         # --------------------------
         acc = accuracy_score(y_test, y_pred)
-        prec = precision_score(y_test, y_pred, zero_division=0)
-        rec = recall_score(y_test, y_pred, zero_division=0)
-        f1 = f1_score(y_test, y_pred, zero_division=0)
+        prec = precision_score(y_test, y_pred, average='weighted', zero_division=0)
+        rec = recall_score(y_test, y_pred, average='weighted', zero_division=0)
+        f1 = f1_score(y_test, y_pred, average='weighted', zero_division=0)
 
         st.subheader("Model Performance")
 
@@ -78,29 +69,7 @@ else:
         col4.metric("F1 Score", f"{f1*100:.1f}%")
 
         # --------------------------
-        # 🔥 ROC CURVE
-        # --------------------------
-        st.subheader("ROC Curve")
-
-        fpr, tpr, _ = roc_curve(y_test, y_prob)
-        roc_auc = auc(fpr, tpr)
-
-        fig = px.line(
-            x=fpr,
-            y=tpr,
-            title=f"ROC Curve (AUC = {roc_auc:.2f})"
-        )
-
-        fig.add_shape(
-            type='line',
-            line=dict(dash='dash'),
-            x0=0, x1=1, y0=0, y1=1
-        )
-
-        st.plotly_chart(fig, use_container_width=True)
-
-        # --------------------------
-        # 🔥 FEATURE IMPORTANCE
+        # FEATURE IMPORTANCE
         # --------------------------
         st.subheader("Feature Importance")
 
@@ -109,26 +78,36 @@ else:
             "Importance": model.feature_importances_
         }).sort_values(by="Importance", ascending=True)
 
-        fig2 = px.bar(
+        fig = px.bar(
             feat_df,
             x="Importance",
             y="Feature",
             orientation='h',
-            title="Top Drivers of User Adoption"
+            title="Top Drivers of Adoption"
         )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+        # --------------------------
+        # PREDICTION DISTRIBUTION
+        # --------------------------
+        st.subheader("Prediction Distribution")
+
+        pred_df = pd.DataFrame({"Predictions": y_pred})
+        fig2 = px.histogram(pred_df, x="Predictions")
 
         st.plotly_chart(fig2, use_container_width=True)
 
         # --------------------------
-        # 🔥 BUSINESS INSIGHT
+        # INSIGHT
         # --------------------------
-        st.subheader("Key Business Insight")
+        st.subheader("Business Insight")
 
         top_feature = feat_df.iloc[-1]["Feature"]
 
         st.success(f"""
 Top driver of adoption: **{top_feature}**
 
-👉 Users influenced by this factor are significantly more likely to adopt the platform  
-👉 Focus product improvements and marketing campaigns around this behavior
+👉 Focus product improvements around this  
+👉 This feature strongly influences user decisions  
 """)
