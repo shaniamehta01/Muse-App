@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-st.set_page_config(layout="wide")
+
 st.title("Prescriptive Strategy")
 
 df = pd.read_csv("muse_dataset.csv")
