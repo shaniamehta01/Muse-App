@@ -3,15 +3,12 @@ import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 from sklearn.ensemble import RandomForestClassifier
 
-st.title("New Customer Scorer")
+st.title("AI Styling Interest Predictor")
 
-# -------------------------------
-# LOAD DATA
-# -------------------------------
 df = pd.read_csv("muse_dataset.csv")
 
 # -------------------------------
-# ENCODE DATA
+# TRAIN MODEL
 # -------------------------------
 df_encoded = df.copy()
 le_dict = {}
@@ -21,39 +18,50 @@ for col in df_encoded.select_dtypes(include='object').columns:
     df_encoded[col] = le.fit_transform(df_encoded[col].astype(str))
     le_dict[col] = le
 
-# -------------------------------
-# TRAIN MODEL
-# -------------------------------
 X = df_encoded.drop("Adoption", axis=1)
 y = df_encoded["Adoption"]
 
 model = RandomForestClassifier()
 model.fit(X, y)
 
-# Save column structure
 model_columns = X.columns
 
 # -------------------------------
-# USER INPUT
+# 🔥 SIMPLIFIED USER INPUT
 # -------------------------------
-st.subheader("Enter New User Details")
+st.subheader("Tell us about the user")
 
-user_data = {}
+col1, col2 = st.columns(2)
 
-for col in X.columns:
-    if col in df.columns:
-        unique_vals = df[col].unique()
-        
-        if df[col].dtype == 'object':
-            user_data[col] = st.selectbox(col, unique_vals)
-        else:
-            user_data[col] = st.number_input(col, value=int(df[col].mean()))
+with col1:
+    shopping_freq = st.selectbox("Shopping Frequency", df["Shopping_Frequency"].unique())
+    platform = st.selectbox("Shopping Platform", df["Platform"].unique())
+    monthly_spend = st.slider("Monthly Spend (₹)", 500, 10000, 4000)
 
-# Convert to DataFrame
+with col2:
+    style = st.selectbox("Preferred Style", df["Style"].unique())
+    struggle = st.selectbox("Struggles with outfits?", ["Yes", "No"])
+    inspiration = st.selectbox("Lacks inspiration?", ["Yes", "No"])
+
+# -------------------------------
+# BUILD INPUT DATA
+# -------------------------------
+user_data = {
+    "Shopping_Frequency": shopping_freq,
+    "Platform": platform,
+    "Monthly_Spend": monthly_spend,
+    "Style": style,
+    "Struggle_Outfits": 1 if struggle == "Yes" else 0,
+    "Lack_Inspiration": 1 if inspiration == "Yes" else 0,
+    "Body_Fit_Issue": 0,
+    "Budget_Issue": 0,
+    "Occasion_Issue": 0
+}
+
 input_df = pd.DataFrame([user_data])
 
 # -------------------------------
-# ENCODE INPUT
+# ENCODE
 # -------------------------------
 for col in input_df.columns:
     if col in le_dict:
@@ -63,25 +71,25 @@ for col in input_df.columns:
             lambda x: le.transform([x])[0] if x in le.classes_ else 0
         )
 
-# -------------------------------
-# ALIGN COLUMNS (IMPORTANT FIX)
-# -------------------------------
+# Align columns
 input_df = input_df.reindex(columns=model_columns, fill_value=0)
 
 # -------------------------------
 # PREDICT
 # -------------------------------
-if st.button("Predict"):
+if st.button("Predict Interest"):
     prediction = model.predict(input_df)[0]
+    proba = model.predict_proba(input_df).max()
 
-    # Decode output
-    adoption_label = le_dict['Adoption'].inverse_transform([prediction])[0]
+    label = le_dict['Adoption'].inverse_transform([prediction])[0]
 
-    st.success(f"Prediction: {adoption_label}")
+    st.subheader("Prediction Result")
 
-    if adoption_label == "Yes":
-        st.info("👉 High probability of app adoption")
-    elif adoption_label == "Maybe":
-        st.warning("👉 Moderate interest — needs targeting")
+    if label == "Yes":
+        st.success(f"🔥 High Interest ({round(proba*100,1)}%)")
+    elif label == "Maybe":
+        st.warning(f"⚡ Moderate Interest ({round(proba*100,1)}%)")
     else:
-        st.error("👉 Low interest — requires strong incentives")
+        st.error(f"❌ Low Interest ({round(proba*100,1)}%)")
+
+    st.info("👉 Use this insight to target users with personalized marketing")
