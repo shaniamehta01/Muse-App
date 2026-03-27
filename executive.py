@@ -4,90 +4,72 @@ import plotly.express as px
 
 st.title("Executive Summary")
 
-# Load data
+# Load dataset
 df = pd.read_csv("muse_dataset.csv")
 
-# ================= KPI CALCULATIONS =================
+# -------------------------------
+# 🔹 KPI METRICS
+# -------------------------------
 total_users = df.shape[0]
-interested = df[df['Adoption'] == 'Yes'].shape[0]
-conversion_rate = round((interested / total_users) * 100, 1)
-
+interested_users = df[df['Adoption'] == 'Yes'].shape[0]
 avg_spend = int(df['Monthly_Spend'].mean())
-revenue = int(avg_spend * interested)
+total_revenue = int(df['Monthly_Spend'].sum())
 
-# Clean label for issue
-issue_map = {
-    "Struggle_Outfits": "Outfit Confusion",
-    "Body_Fit_Issue": "Fit Issues",
-    "Lack_Inspiration": "Lack of Inspiration",
-    "Budget_Issue": "Budget Constraints"
-}
+# Top issue
+issues = ['Struggle_Outfits', 'Body_Fit_Issue', 'Lack_Inspiration', 'Budget_Issue']
+top_issue = df[issues].sum().idxmax()
 
-top_issue_raw = df[list(issue_map.keys())].sum().idxmax()
-top_issue = issue_map[top_issue_raw]
-
-# ================= KPI CARDS =================
-st.markdown("### Key Business Metrics")
-
+# Display KPIs
 col1, col2, col3, col4 = st.columns(4)
 
-col1.metric(
-    "Interested Customers",
-    f"{interested} / {total_users}",
-    f"{conversion_rate}% conversion"
-)
-
-col2.metric(
-    "Avg Monthly Spend",
-    f"₹{avg_spend}"
-)
-
-col3.metric(
-    "Total Revenue Potential",
-    f"₹{revenue}"
-)
-
-col4.metric(
-    "Top Customer Pain Point",
-    top_issue
-)
+col1.metric("Interested Customers", f"{interested_users} / {total_users}")
+col2.metric("Avg Monthly Spend", f"₹{avg_spend}")
+col3.metric("Total Revenue Potential", f"₹{total_revenue}")
+col4.metric("Top Customer Pain Point", top_issue)
 
 st.markdown("---")
 
-# ================= CHARTS =================
+# -------------------------------
+# 🔹 PURCHASE INTENT CHART (FIXED)
+# -------------------------------
+st.subheader("Customer Purchase Intent")
 
-st.markdown("### Customer Purchase Intent")
+adoption_counts = df['Adoption'].value_counts().reset_index()
+adoption_counts.columns = ['Adoption', 'Count']
 
 fig1 = px.bar(
-    df['Adoption'].value_counts().reset_index(),
-    x='index',
-    y='Adoption',
-    labels={'index': 'Adoption Category', 'Adoption': 'Users'},
-    title="Purchase Likelihood Distribution"
+    adoption_counts,
+    x='Adoption',
+    y='Count',
+    title="Purchase Likelihood Distribution",
+    color='Adoption'
 )
 
 st.plotly_chart(fig1, use_container_width=True)
 
-# ================= SPENDING =================
-
-st.markdown("### Spending Behavior")
+# -------------------------------
+# 🔹 SPENDING DISTRIBUTION
+# -------------------------------
+st.subheader("Spending Distribution")
 
 fig2 = px.histogram(
     df,
-    x="Monthly_Spend",
-    nbins=30,
-    title="Monthly Spend Distribution"
+    x='Monthly_Spend',
+    nbins=20,
+    title="Monthly Spending Distribution"
 )
 
 st.plotly_chart(fig2, use_container_width=True)
 
-# ================= INSIGHT TEXT =================
+# -------------------------------
+# 🔹 QUICK INSIGHT
+# -------------------------------
+st.markdown("### Key Insight")
 
-st.markdown("### Key Insights")
+conversion_rate = round((interested_users / total_users) * 100, 1)
 
 st.success(f"""
-• {conversion_rate}% of users show purchase intent  
-• Major pain point: **{top_issue}**  
-• Strong revenue potential of **₹{revenue}**  
-• Indicates strong product-market fit for AI styling  
+✔ {conversion_rate}% users are likely to adopt the app  
+✔ Main problem users face: {top_issue}  
+✔ Strong opportunity for AI-based styling solutions  
 """)
