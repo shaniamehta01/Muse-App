@@ -1,54 +1,15 @@
 import streamlit as st
 
-# ---------------------------
-# PAGE CONFIG
-# ---------------------------
-st.set_page_config(page_title="Muse AI App", layout="wide")
+# ---------------- PAGE CONFIG ----------------
+st.set_page_config(page_title="Muse AI", layout="wide")
 
-# ---------------------------
-# 🎨 PURPLE THEME
-# ---------------------------
-st.markdown("""
-<style>
-.stApp {
-    background-color: #f9f6ff;
-}
-
-section[data-testid="stSidebar"] {
-    background-color: #f3ecff;
-}
-
-h1, h2, h3 {
-    color: #6a0dad;
-}
-
-.stButton>button {
-    background-color: #6a0dad;
-    color: white;
-    border-radius: 8px;
-}
-
-[data-testid="stMetricValue"] {
-    color: #6a0dad;
-}
-
-.stSuccess {
-    background-color: #ede4ff;
-    color: #4b0082;
-}
-</style>
-""", unsafe_allow_html=True)
-
-# ---------------------------
-# TITLE + TAGLINE
-# ---------------------------
+# ---------------- TITLE ----------------
 st.title("Muse AI Fashion Analytics App")
-st.sidebar.image("Muse.png", width=120)
-st.markdown("### Turning fashion confusion into confident decisions")
 
-# ---------------------------
-# SIDEBAR NAVIGATION
-# ---------------------------
+# ---------------- SIDEBAR LOGO ----------------
+st.sidebar.image("Muse.png", width=120)
+
+# ---------------- SIDEBAR NAVIGATION ----------------
 page = st.sidebar.radio("Go to", [
     "Home",
     "Executive Summary",
@@ -60,63 +21,59 @@ page = st.sidebar.radio("Go to", [
     "New Customer Scorer"
 ])
 
-# ---------------------------
-# HOME PAGE (NEW 🔥)
-# ---------------------------
+# ---------------- ROUTING ----------------
+
+# -------- HOME PAGE --------
 if page == "Home":
-    st.header("Welcome to Muse AI")
+
+    col1, col2 = st.columns([1, 4])
+
+    with col1:
+        st.image("Muse.png", width=120)
+
+    with col2:
+        st.markdown("## Welcome to Muse AI")
 
     st.write("""
-Choosing outfits is not as simple as it seems. Even with countless options, users often feel confused due to lack of inspiration, fit concerns, and multiple overlapping issues.
+Choosing outfits is not as simple as it seems. Even with endless options, users still struggle with decisions. 
+Lack of inspiration, fit concerns, and multiple overlapping issues often make the experience frustrating.
 
-This leads to hesitation, decision fatigue, and lower conversions.
-""")
+Muse AI uses data-driven insights to understand these behaviors and help improve fashion decision-making.
+    """)
 
-    st.subheader("What This App Does")
+    st.markdown("### What this app does:")
 
-    st.write("""
-This application uses data analytics and machine learning to:
+    st.markdown("""
+- 📊 Analyzes customer behavior  
+- 🧠 Identifies key fashion pain points  
+- 🔮 Predicts purchase likelihood  
+- 🚀 Suggests business strategies  
+    """)
 
-- Identify key customer pain points  
-- Understand behavior patterns  
-- Predict user decisions  
-- Recommend business strategies  
-""")
-
-    st.subheader("What's Inside")
-
-    st.write("""
-- **Executive Summary** → Key business metrics  
-- **Descriptive Analysis** → What users are facing  
-- **Clustering** → User segmentation  
-- **Association Rules** → Behavior patterns  
-- **Prediction Models** → Likelihood of action  
-- **Prescriptive Actions** → Strategic recommendations  
-- **New Customer Scorer** → Evaluate new users  
-""")
-
-    st.success("Goal: Move from product-based selling to solution-driven fashion experiences.")
-
-# ---------------------------
-# ROUTING (KEEP SAME)
-# ---------------------------
+# -------- EXECUTIVE SUMMARY --------
 elif page == "Executive Summary":
     exec(open("executive.py").read())
 
+# -------- DESCRIPTIVE --------
 elif page == "Descriptive Analysis":
     exec(open("descriptive.py").read())
 
+# -------- CLUSTERING --------
 elif page == "Clustering":
     exec(open("clustering.py").read())
 
+# -------- ASSOCIATION --------
 elif page == "Association Rules":
     exec(open("association.py").read())
 
+# -------- PREDICTION --------
 elif page == "Prediction Models":
     exec(open("prediction.py").read())
 
+# -------- PRESCRIPTIVE --------
 elif page == "Prescriptive Actions":
     exec(open("prescriptive.py").read())
 
+# -------- NEW USER --------
 elif page == "New Customer Scorer":
     exec(open("new_user.py").read())
