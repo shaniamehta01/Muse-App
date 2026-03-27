@@ -15,9 +15,9 @@ page = st.sidebar.radio("Go to", [
     "New Customer Scorer"
 ])
 
-# Routing using exec (IMPORTANT FIX)
+# Routing (IMPORTANT)
 if page == "Executive Summary":
-    exec(open("descriptive.py").read())
+    exec(open("executive.py").read())
 
 elif page == "Descriptive Analysis":
     exec(open("descriptive.py").read())
