@@ -1,89 +1,101 @@
 import streamlit as st
 import pandas as pd
+import plotly.express as px
 from mlxtend.frequent_patterns import apriori, association_rules
 
 st.title("Customer Behavior Insights")
 
 df = pd.read_csv("muse_dataset.csv")
 
-# -------------------------------
+# ---------------------------
 # PREP DATA
-# -------------------------------
+# ---------------------------
 binary_cols = ['Struggle_Outfits','Body_Fit_Issue','Lack_Inspiration','Budget_Issue']
 df_bin = df[binary_cols]
 
-# Run Apriori
 freq = apriori(df_bin, min_support=0.1, use_colnames=True)
 rules = association_rules(freq, metric="confidence", min_threshold=0.5)
 
-# Clean text
 rules['antecedents'] = rules['antecedents'].apply(lambda x: ', '.join(list(x)))
 rules['consequents'] = rules['consequents'].apply(lambda x: ', '.join(list(x)))
 
 rules = rules.sort_values(by='confidence', ascending=False)
 
-# -------------------------------
-# 🔥 1. MAIN BUSINESS FINDING
-# -------------------------------
-st.subheader("🚨 What Are Users Struggling With?")
+# ---------------------------
+# 🔥 1. CHART (MOST IMPORTANT)
+# ---------------------------
+st.subheader("Top Customer Behavior Patterns")
 
+top_rules = rules.head(8)
+
+fig = px.bar(
+    top_rules,
+    x="confidence",
+    y="antecedents",
+    color="consequents",
+    orientation='h',
+    title="Top Problem Combinations Driving Customer Issues"
+)
+
+st.plotly_chart(fig, use_container_width=True)
+
+# ---------------------------
+# 🔥 2. INSIGHT CARD
+# ---------------------------
 top_rule = rules.iloc[0]
 
-st.markdown(f"""
-### 👉 Most Important Insight
+st.markdown("### Key Insight")
 
+st.success(f"""
 Users facing **{top_rule['antecedents']}**  
 are highly likely to also face **{top_rule['consequents']}**
 
-📊 Confidence: **{round(top_rule['confidence']*100,1)}%**
+👉 Confidence: {round(top_rule['confidence']*100,1)}%
 """)
 
-st.markdown("---")
+# ---------------------------
+# 🔥 3. BUSINESS IMPACT
+# ---------------------------
+st.subheader("Why This Matters")
 
-# -------------------------------
-# 🔥 2. WHY IT MATTERS
-# -------------------------------
-st.subheader("💡 What This Means")
+col1, col2 = st.columns(2)
 
-st.info("""
-Users don’t face isolated problems — they experience multiple styling challenges together.
+with col1:
+    st.info("""
+    Customers face multiple issues together  
+    → Not single problem solving
+    """)
 
-This means:
-• Solving just one issue is not enough  
-• Users expect complete styling assistance  
+with col2:
+    st.info("""
+    Higher frustration → Higher drop-off risk  
+    → Opportunity for AI styling
+    """)
+
+# ---------------------------
+# 🔥 4. ACTION (THIS IS WHAT PROF CARES ABOUT)
+# ---------------------------
+st.subheader("Recommended Action")
+
+st.markdown("""
+**Product:**
+- AI outfit recommendation engine
+- Combine inspiration + fit + occasion
+
+**Marketing:**
+- "Confused about outfits? We solve everything."
+- Focus on multi-problem users
+
+**Business Goal:**
+- Increase conversion
+- Improve user satisfaction
 """)
 
-# -------------------------------
-# 🔥 3. PRODUCT DECISION
-# -------------------------------
-st.subheader("🚀 Product Strategy")
-
-st.success("""
-👉 Build an **AI Outfit Recommendation Engine**  
-👉 Combine it with **Inspiration Feed**  
-👉 Add **Body Fit + Occasion suggestions together**
-
-Position Muse as:
-👉 "Your complete personal stylist"
-""")
-
-# -------------------------------
-# 🔥 4. MARKETING STRATEGY
-# -------------------------------
-st.subheader("📢 Marketing Strategy")
-
-st.write("""
-• Target users facing multiple issues  
-• Use messaging like:  
-  "Confused about outfits? We fix EVERYTHING."  
-• Highlight transformation (before vs after styling)
-""")
-
-# -------------------------------
-# 🔥 5. OPTIONAL (MINIMAL DATA VIEW)
-# -------------------------------
-with st.expander("See Supporting Data (Optional)"):
+# ---------------------------
+# OPTIONAL CLEAN TABLE
+# ---------------------------
+with st.expander("See Detailed Rules"):
     st.dataframe(
-        rules[['antecedents','consequents','confidence','lift']].head(5),
+        rules[['antecedents','consequents','confidence','lift']].head(10),
         use_container_width=True
     )
